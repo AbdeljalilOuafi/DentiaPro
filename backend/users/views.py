@@ -13,6 +13,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import generics, permissions
 from .models import User, Profile
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny
 
 
 class RegisterUserView(GenericAPIView):
@@ -52,6 +53,7 @@ class VerifyUserEmail(GenericAPIView):
 
 class LoginUserView(GenericAPIView):
     serializer_class = LoginSerializer
+    permission_classes = [AllowAny]  
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)

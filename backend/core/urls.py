@@ -19,10 +19,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from tenants.views import tenant_data_test
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('users.urls')),
+    path('api/clinics/', tenant_data_test, name='clinic-test'),
 ]
 
 if settings.DEBUG:
