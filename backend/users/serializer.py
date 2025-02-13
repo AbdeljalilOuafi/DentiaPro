@@ -74,13 +74,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             tenant = Tenant.objects.create(
                 user=user,
                 name=validated_data['clinic_name'],  # Use clinic_name instead of first_name
-                schema_name=f"tenant_{user.id}"  # Make sure schema_name is unique
+                schema_name = f"tenant_{user.id}",  # Makes sure schema_name is unique
+                paid_until=None  # We can set a trial period date here
+
             )
             tenant.save()
             
         domain_name = f"{user.clinic_name.lower().replace(' ', '-')}.vercel.app"  # Sanitize domain name
-        user.domain_name = domain_name
-        user.save()
         
         Domain.objects.create(
             tenant=tenant,
@@ -111,10 +111,10 @@ class LoginSerializer(serializers.ModelSerializer):
         user = authenticate(request, email=email, password=password)
         if not user:
             raise AuthenticationFailed("Invalid credentials")
-        if not user.is_verified:
-            raise AuthenticationFailed("Email is not verified")
-        if not user.is_paid:
-            raise AuthenticationFailed("The service is not paid, redirect to the payment page")
+        # if not user.is_verified:
+        #     raise AuthenticationFailed("Email is not verified")
+        # if not user.is_paid:
+        #     raise AuthenticationFailed("The service is not paid, redirect to the payment page")
 
         user_tokens = user.tokens()
         return {

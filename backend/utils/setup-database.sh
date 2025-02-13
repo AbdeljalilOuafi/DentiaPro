@@ -23,3 +23,13 @@ sudo systemctl enable postgresql  # Enable on startup
 # DB_PASSWORD=dentiapro_dev
 # DB_HOST=localhost
 # DB_PORT=5432
+
+
+# Run the following : 
+
+# First, make migrations for tenants app with the updated model 
+# python3 manage.py makemigrations tenants 
+# Then apply migrations to public schema 
+# python3 manage.py migrate_schemas --shared 
+# Finally, create a superuser 
+# python3 manage.py createsuperuser
