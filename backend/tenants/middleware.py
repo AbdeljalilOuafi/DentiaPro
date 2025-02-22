@@ -40,40 +40,64 @@ class CustomTenantMiddleware(TenantMainMiddleware):
         print(f"Curent domain: {current_domain}")
         print(f"Tenant domain: {tenant_domain}")
         
-        # This prints AnonymousUser for some reason ??
-        # print(f"Request user: {request.user}")
+        
+        print("==== Debug Permission Information ====")
+        print(f"User: {request.user}")
+        print(f"User permissions: {request.user.get_all_permissions()}")  # This will show all permissions
+        print(f"Has view_user permission: {request.user.has_perm('view_user')}")
+        
+        print("==== User Specific Debug Infomation ====")
+        print(f'user: {request.user.email}')
+        print(f'tenant: {request.user.tenant.name}') # This line is causing a crash for users created 
+        print(f'role: {request.user.role}')
+        
+
         
         # If we're dealing with public tenant, just return
-        # if current_tenant.schema_name == 'public':
-        #     return response
-            
+        if current_tenant.schema_name == 'public':
+            return response
+        
+
         try:
-            # Ensure user is authenticated if token is present
-            if 'Authorization' in request.headers:
-                try:
-                    jwt_auth = JWTAuthentication()
-                    validated_token = jwt_auth.get_validated_token(
-                        request.headers['Authorization'].split(' ')[1]
-                    )
-                    # Get user with select_related to ensure tenant is loaded
-                    user = jwt_auth.get_user(validated_token)
-                    request.user = user
-                    print(f"Request user after manual assignment: {request.user}")
-                except Exception as e:
-                    print(f"Token validation error: {str(e)}")
-                    return JsonResponse({"error": "Invalid authentication token"}, status=401)
+        #     # Ensure user is authenticated if token is present
+        #     if 'Authorization' in request.headers:
+        #         try:
+        #             jwt_auth = JWTAuthentication()
+        #             validated_token = jwt_auth.get_validated_token(
+        #                 request.headers['Authorization'].split(' ')[1]
+        #             )
+        #             # Get user with select_related to ensure tenant is loaded
+        #             user = jwt_auth.get_user(validated_token)
+        #             request.user = user
+        #             print(user)
+        #             print("User has been assigned to the request")
+        #             print(f"Request user after manual assignment: {request.user}")
+        #         except Exception as e:
+        #             print(f"Token validation error: {str(e)}")
+        #             return JsonResponse({"error": "Invalid authentication token"}, status=401)
             
-            # Handle authentication check
+        #     # Handle authentication check
             if isinstance(request.user, AnonymousUser):
                 if not self._is_allowed_anonymous_url(request):
-                    return JsonResponse({"error": "Authentication required"}, status=401)
+                    return JsonResponse({"error": "Authentication required, Login and try again"}, status=401)
                 return response
+            
+            # if not request.user.tenant:
+            #     return JsonResponse({"you fucked boy": "this user actually have no tenant attached to it. take a fucking look at CreateTenantUserView"})
+            # elif request.user.tenant:
+            #     return JsonResponse({'user': request.user.email,
+            #                          'tenant': request.user.tenant.name,
+            #                          'role': request.user.role})
+
+            
+            user_domain = Domain.objects.get(tenant=request.user.tenant)
             
             # User validation
             if request.user.tenant != current_tenant:
-                return JsonResponse({"error": "Invalid tenant access"}, status=403)
+                return JsonResponse({"error": "Invalid tenant access, Please use your assigned domain",
+                                    "current": current_domain,
+                                    "allowed": user_domain.domain.lower()}, status=403)
             # Domain validation
-            user_domain = Domain.objects.get(tenant=request.user.tenant)
             try:
                 if current_domain != user_domain.domain.lower():
                     return JsonResponse({
@@ -95,7 +119,7 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             print(f"Middleware error: {str(e)}")
             import traceback
             print(f"Traceback: {traceback.format_exc()}")
-            return JsonResponse({"error": "Access denied"}, status=403)
+            return JsonResponse({"error": f"Access denied: {str(e)}"}, status=403)
     
     def _is_public_url(self, request):
         public_urls = [

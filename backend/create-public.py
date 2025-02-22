@@ -35,22 +35,3 @@ Domain.objects.create(
     tenant=tenant,
     is_primary=True
 )
-
-
-
-# # Create public tenant
-# public_tenant, created = Tenant.objects.get_or_create(
-#     schema_name=get_public_schema_name(),
-#     defaults={
-#         'name': 'Public Tenant',
-#         'is_verified': True,
-        
-#         }
-# )
-
-# # Create domain for public tenant
-# Domain.objects.get_or_create(
-#     domain='localhost',  # Your public domain
-#     tenant=public_tenant,
-#     is_primary=True
-# )

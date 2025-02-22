@@ -104,7 +104,8 @@ def populate_test_data():
                 last_name="Doe",
                 clinic_name="Dental Clinic 1",
                 is_paid=True,
-                is_verified=True #Email verification
+                is_verified=True, #Email verification
+                role=User.Role.ADMIN
             )
             
             tenant1 = Tenant.objects.create(
@@ -129,7 +130,9 @@ def populate_test_data():
                 last_name="Smith",
                 clinic_name="Dental Clinic 2",
                 is_paid=True,
-                is_verified=True
+                is_verified=True,
+                role=User.Role.ADMIN
+
             )
             
             tenant2 = Tenant.objects.create(
