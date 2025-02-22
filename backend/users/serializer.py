@@ -18,8 +18,7 @@ from django.db import transaction
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'fullname']
-
+        fields = ['id', 'email', 'first_name', 'last_name', 'fullname', 'role']
 
 
 class PublicUserProfileSerializer(serializers.ModelSerializer):
@@ -64,7 +63,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                 first_name=validated_data.get('first_name'),
                 last_name=validated_data.get('last_name'),
                 password=validated_data.get('password'),
-                clinic_name=validated_data.get('clinic_name')
+                clinic_name=validated_data.get('clinic_name'),
+                role=User.Role.ADMIN  # Set role to ADMIN by default
             )
             user.save()  # Ensures user.id is generated
 

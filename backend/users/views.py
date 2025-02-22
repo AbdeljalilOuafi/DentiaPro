@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from .serializer import *
-
+from .permissions import *
 from rest_framework.response import Response
 from rest_framework import status
 from .utils import send_code_to_user, resend_email
@@ -14,6 +14,11 @@ from rest_framework import generics, permissions
 from .models import User, Profile
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+
+    
 
 
 class RegisterUserView(GenericAPIView):
