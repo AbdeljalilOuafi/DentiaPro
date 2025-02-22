@@ -44,7 +44,7 @@ class CustomTenantMiddleware(TenantMainMiddleware):
         print("==== Debug Permission Information ====")
         print(f"User: {request.user}")
         print(f"User permissions: {request.user.get_all_permissions()}")  # This will show all permissions
-        print(f"Has view_user permission: {request.user.has_perm('view_user')}")
+        print(f"Has view_user permission: {request.user.has_perm('users.view_user')}")
         
         print("==== User Specific Debug Infomation ====")
         print(f'user: {request.user.email}')
@@ -110,8 +110,10 @@ class CustomTenantMiddleware(TenantMainMiddleware):
                 print(f"Domain not found for tenant: {request.user.tenant}")
                 return JsonResponse({"error": "Domain configuration error"}, status=403)
             
-            if not request.user.is_paid:
-                return JsonResponse({"error": "Payment required"}, status=402)
+            
+            # Verify Payment, make sure this check is only ran on the first Register, not on employees
+            # if not request.user.is_paid:
+            #     return JsonResponse({"error": "Payment required"}, status=402)
             
             return response
             

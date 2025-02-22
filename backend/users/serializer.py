@@ -13,6 +13,7 @@ from .models import Profile
 from django.conf import settings
 from tenants.models import Tenant, Domain
 from django.db import transaction
+import uuid
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -57,36 +58,39 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         # Remove password2 as it's not needed for user creation
         validated_data.pop('password2', None)
         
+        schema_name = f"tenant_{uuid.uuid4().hex}"  # e.g., "tenant_1a2b3c4d5e..."
+        
         with transaction.atomic():
+            tenant = Tenant.objects.create(
+                user=user,
+                name=validated_data['clinic_name'],  # Use clinic_name instead of first_name
+                schema_name = schema_name,  # Makes sure schema_name is unique
+                paid_until=None  # We can set a trial period date here
+            )
+            tenant.save()
+            
             user = User.objects.create_user(
                 email=validated_data.get('email'),
                 first_name=validated_data.get('first_name'),
                 last_name=validated_data.get('last_name'),
                 password=validated_data.get('password'),
                 clinic_name=validated_data.get('clinic_name'),
-                role=User.Role.ADMIN  # Set role to ADMIN by default
+                tenant=tenant,
+                role=User.Role.ADMIN  # Set role to ADMIN by default on the Register endpoint since it's a new user
             )
             user.save()  # Ensures user.id is generated
 
             Profile.objects.create(user=user)
             
-            # Now user.id exists, so Tenant creation is safe since schema_name depends on the user.id to be unique
-            tenant = Tenant.objects.create(
-                user=user,
-                name=validated_data['clinic_name'],  # Use clinic_name instead of first_name
-                schema_name = f"tenant_{user.id}",  # Makes sure schema_name is unique
-                paid_until=None  # We can set a trial period date here
 
-            )
-            tenant.save()
             
-        domain_name = f"{user.clinic_name.lower().replace(' ', '-')}.vercel.app"  # Sanitize domain name
-        
-        Domain.objects.create(
-            tenant=tenant,
-            domain=domain_name,
-            is_primary=True
-        )
+            domain_name = f"{user.clinic_name.lower().replace(' ', '-')}.vercel.app"  # Sanitize domain name
+            
+            Domain.objects.create(
+                tenant=tenant,
+                domain=domain_name,
+                is_primary=True
+            )
 
         return (user, domain_name) 
 

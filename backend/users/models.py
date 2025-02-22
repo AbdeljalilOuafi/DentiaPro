@@ -18,6 +18,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
     
+    tenant = models.ForeignKey(
+    'tenants.Tenant',  # Reference to Tenant model
+    on_delete=models.CASCADE,
+    related_name='users',  # Access users via `tenant.users.all()`
+    null=True,  # Allow null temporarily for migrations
+    blank=True,
+    )  
     class Role(models.TextChoices):
         # if user.role == User.Role.DENTIST compares "DENTIST" == "DENTIST"
         
