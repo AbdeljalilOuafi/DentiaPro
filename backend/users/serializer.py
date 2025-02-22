@@ -102,15 +102,15 @@ class LoginSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(max_length=255, read_only=True)
     access_token = serializers.CharField(max_length=255, read_only=True)
     refresh_token = serializers.CharField(max_length=255, read_only=True)
+    role = serializers.CharField(read_only=True) 
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'full_name', 'access_token', 'refresh_token']
+        fields = ['email', 'password', 'full_name', 'access_token', 'refresh_token', 'role']
 
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
-        # Line 46 where the error is coming from is below
         request = self.context.get('request')
         user = authenticate(request, email=email, password=password)
         if not user:
@@ -125,7 +125,8 @@ class LoginSerializer(serializers.ModelSerializer):
             'email': user.email,
             'full_name': user.fullname,
             'access_token': str(user_tokens.get('access')),
-            'refresh_token': str(user_tokens.get('refresh'))
+            'refresh_token': str(user_tokens.get('refresh')),
+            'role': user.role
         }
 
 class PasswordResetRequestSerializer(serializers.Serializer):
