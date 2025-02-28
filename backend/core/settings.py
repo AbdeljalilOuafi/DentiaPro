@@ -52,18 +52,19 @@ DATABASE_ROUTERS = (
 SHARED_APPS = [
     "django_tenants",
     "django.contrib.contenttypes",
-    "django.contrib.auth",  # User model should exist in the public schema
+    "django.contrib.auth",  
     "django.contrib.sessions",
-    "django.contrib.messages",  # Add this
-    "django.contrib.admin",     # Move this here from INSTALLED_APPS
-    "users",  # Public Schema models (Users, Auth, etc.)
+    "django.contrib.messages",
+    "django.contrib.admin",
+    "users",  # User model should exist in the public schema
     "tenants",  # Tenant model for tracking
 ]
 
 TENANT_APPS = [
     "django.contrib.contenttypes",  # Required inside tenant schemas
     "inventory",  # Example: Each tenant has their own order inventory
-    "appointments",  # Example: Dentist patient appointments
+    "appointments",
+    "patients",
 ]
 
 

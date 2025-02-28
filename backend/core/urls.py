@@ -24,9 +24,13 @@ from tenants.views import TenantDataView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     path('api/auth/', include('users.urls')),
     path('api/users/', include('tenants.urls')),
+    path('api/appointments/', include('appointments.urls')),
+    path('api/patients/', include('patients.urls')),
     path('api/clinics/', TenantDataView.as_view(), name='clinic-test'),
+
 ]
 
 if settings.DEBUG:

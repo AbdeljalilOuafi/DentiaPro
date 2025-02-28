@@ -176,9 +176,9 @@ def main():
     
     print("\nSetup completed successfully!")
     print("\nCredentials:")
-    print("Superuser:")
-    print("  Email: admin@example.com")
-    print("  Password: admin123")
+    # print("Superuser:")
+    # print("  Email: admin@example.com")
+    # print("  Password: admin123")
     print("\nTest Users:")
     print("1. Dental Clinic 1:")
     print("  Email: dentist1@example.com")
