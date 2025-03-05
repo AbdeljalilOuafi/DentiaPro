@@ -6,13 +6,17 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .models import Patient
 from .serializers import PatientSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 class PatientViewSet(viewsets.ModelViewSet):
     """
     ViewSet for viewing and editing patient information.
     """
+    authentication_classes = [JWTAuthentication]
     serializer_class = PatientSerializer
-    permission_classes = [IsAuthenticated]  # Or use custom permission class if needed
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
     
     def get_queryset(self):
         """
@@ -43,7 +47,10 @@ class PatientViewSet(viewsets.ModelViewSet):
         """
         Set the tenant automatically based on the request
         """
-        serializer.save(tenant=self.request.tenant)
+        serializer.save(
+            tenant=self.request.tenant,
+            dentist=self.request.user
+        )
         
     def get_serializer_context(self):
         """

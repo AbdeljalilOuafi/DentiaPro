@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 # Create your views here.
@@ -51,7 +52,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                 status=400
             )
             
-        # Get booked appointments
+        # Convert string dates to timezone-aware datetime
+        start_date_dt = timezone.make_aware(datetime.strptime(start_date, '%Y-%m-%d'))
+        end_date_dt = timezone.make_aware(datetime.strptime(end_date, '%Y-%m-%d'))
+        
+        # Get booked appointments (these are already timezone-aware)
         booked_slots = Appointment.objects.filter(
             tenant=request.tenant,
             dentist_id=dentist_id,
@@ -60,18 +65,22 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         
         # Generate all possible slots
         all_slots = []
-        current_date = datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        current_date = start_date_dt
         
-        while current_date <= end_date:
+        while current_date <= end_date_dt:
             if current_date.weekday() < 5:  # Monday to Friday
                 for hour in range(9, 17):  # 9 AM to 5 PM
-                    slot_start = current_date.replace(hour=hour, minute=0)
+                    # Create timezone-aware slot times
+                    slot_start = timezone.make_aware(
+                        datetime.combine(current_date.date(), datetime.min.time().replace(hour=hour))
+                    )
                     slot_end = slot_start + timedelta(minutes=60)
                     
-                    # Check if slot is available
+                    # Check if slot is available (booked slots are already timezone-aware)
                     is_available = not any(
-                        booked.start_time <= slot_start < booked.end_time
+                        booked['start_time'] <= slot_start <= booked['end_time'] or
+                        booked['start_time'] <= slot_end <= booked['end_time'] or
+                        (slot_start <= booked['start_time'] and slot_end >= booked['end_time'])
                         for booked in booked_slots
                     )
                     

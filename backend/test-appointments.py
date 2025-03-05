@@ -22,7 +22,8 @@ BASE_URL = 'http://dental-clinic-1.localhost:8000/api'  # Adjust as needed
 
 # Authentication - usually you'd have a login endpoint to get a token
 # Here we'll assume you have a token already
-AUTH_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQwNjg3MDM1LCJpYXQiOjE3NDA2ODY3MzUsImp0aSI6IjdjZGQ2YTgzNGVhZDQ2ZWRhNDgxNDdiMzNiOWFkNjljIiwidXNlcl9pZCI6MX0.4IEkbFd7uE6xIE3il7ce19oy_ZiAlNNdODabo7EFWA0'
+
+AUTH_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQxMDE4NDExLCJpYXQiOjE3NDEwMTgxMTEsImp0aSI6IjVhY2NiYTgyZWE5NDRkMmFiMTg5ODk2MDdlZDI3NTY0IiwidXNlcl9pZCI6MX0.g9lDLcZYOKGTLb0IxSD-5oAJnrTNiM02aAymyrUsbKI'
 HEADERS = {
     'Authorization': f'Token {AUTH_TOKEN}',
     'Content-Type': 'application/json'
