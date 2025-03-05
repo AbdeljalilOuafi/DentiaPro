@@ -75,13 +75,14 @@ INSTALLED_APPS = list(set(SHARED_APPS + TENANT_APPS))
 MIDDLEWARE = [
     # Custom middleware comes first
     # Django's default middleware
+    'tenants.middleware.CustomTenantMiddleware',
     'django_tenants.middleware.main.TenantMainMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'tenants.middleware.CustomTenantMiddleware',
+    # Put custom authentication middleware here if shit broke
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -91,8 +92,27 @@ MIDDLEWARE = [
 AUTH_USER_MODEL="users.User"
 TENANT_MODEL = "tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
-PUBLIC_SCHEMA_NAME = 'public'
 
+PUBLIC_SCHEMA_NAME = 'public'
+PUBLIC_SCHEMA_URLCONF = 'core.public_urls'
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+TENANT_IGNORE_URLS = [
+    r'^/api/auth/register/',
+    r'^/api/auth/verify-email/',
+    # r'^/api/auth/login/', # The user will login under his subdomain which will link to a Tenant so we should't use public schema
+    r'^/api/auth/password-reset/',
+    r'^/api/auth/password-reset-confirm/',
+    r'^/api/auth/set-new-password/',
+    r'^/api/auth/logout/',
+]
+
+# Domain settings
+DOMAIN_NAME = config('DOMAIN_NAME', default='localhost')
+PUBLIC_DOMAIN_NAME = config('PUBLIC_DOMAIN_NAME', default=DOMAIN_NAME)
+DEVELOPMENT_DOMAIN = config('DEVELOPMENT_DOMAIN', default='localhost')
+
+# We Use this to determine if we're in development
+IS_DEVELOPMENT = config('DJANGO_ENV', default='development') == 'development'
 
 
 

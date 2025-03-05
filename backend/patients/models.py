@@ -49,13 +49,10 @@ class Patient(models.Model):
         blank=True
     )
     
-    # Dental-Specific Fields
     dentist = models.ForeignKey(
         'users.User',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=False,
-        related_name='patients' # request.user.patients = [Patient, Patient, Patient]
+        on_delete=models.PROTECT,  # Prevents deletion of User if they have patients
+        related_name='patients'
     )
     
     last_dental_visit = models.DateField(_("Last Dental Visit"), null=True, blank=True)

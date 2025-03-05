@@ -109,8 +109,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             ],
             self.Role.DENTIST: [
                 'appointments.add_appointment', 'appointments.change_appointment',
-                'view_medical_records', 'add_medical_records',
-                'view_patient', 'add_patient'
+                'appointments.view_appointment', 'appointments.delete_appointment'
+                'users.view_user',
+                # 'view_medical_records', 'add_medical_records',
+                # 'view_patient', 'add_patient'
             ],
             self.Role.RECEPTIONIST: [
                 'appointments.add_appointment', 'appointments.change_appointment',
