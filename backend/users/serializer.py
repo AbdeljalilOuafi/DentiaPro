@@ -13,13 +13,18 @@ from .models import Profile
 from django.conf import settings
 from tenants.models import Tenant, Domain
 from django.db import transaction
+import uuid
+from decouple import config
+from django.db import IntegrityError
+from django.utils.text import slugify
+import random
+import string
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'fullname']
-
+        fields = ['id', 'email', 'first_name', 'last_name', 'fullname', 'role']
 
 
 class PublicUserProfileSerializer(serializers.ModelSerializer):
@@ -39,7 +44,7 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=68, min_length=8, write_only=True)
     password2 = serializers.CharField(max_length=68, min_length=8, write_only=True)
-    clinic_name = serializers.CharField(max_length=100)  # Add this field
+    clinic_name = serializers.CharField(max_length=100) 
 
 
     class Meta:
@@ -51,44 +56,75 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         password2 = attrs.get('password2', '')
 
         if password != password2:
-            serializers.ValidationError("Passwords do not match")
+            raise serializers.ValidationError({"password": "Passwords do not match"})
         return attrs
 
     def create(self, validated_data):
         # Remove password2 as it's not needed for user creation
         validated_data.pop('password2', None)
         
+        schema_name = f"tenant_{uuid.uuid4().hex}"  # e.g., "tenant_1a2b3c4d5e..."
+        
         with transaction.atomic():
+            tenant = Tenant.objects.create(
+                name=validated_data['clinic_name'],  # Use clinic_name instead of first_name
+                schema_name = schema_name,  # Makes sure schema_name is unique
+                paid_until=None  # We can set a trial period date here
+            )
+            tenant.save()
+            
             user = User.objects.create_user(
                 email=validated_data.get('email'),
                 first_name=validated_data.get('first_name'),
                 last_name=validated_data.get('last_name'),
                 password=validated_data.get('password'),
-                clinic_name=validated_data.get('clinic_name')
+                clinic_name=validated_data.get('clinic_name'),
+                tenant=tenant,
+                role=User.Role.ADMIN  # Set role to ADMIN by default on the Register endpoint since it's the first user for the newly created tenant
             )
             user.save()  # Ensures user.id is generated
 
             Profile.objects.create(user=user)
             
-            # Now user.id exists, so Tenant creation is safe since schema_name depends on the user.id to be unique
-            tenant = Tenant.objects.create(
-                user=user,
-                name=validated_data['clinic_name'],  # Use clinic_name instead of first_name
-                schema_name = f"tenant_{user.id}",  # Makes sure schema_name is unique
-                paid_until=None  # We can set a trial period date here
 
-            )
-            tenant.save()
+            # Domain Logic
             
-        domain_name = f"{user.clinic_name.lower().replace(' ', '-')}.vercel.app"  # Sanitize domain name
-        
-        Domain.objects.create(
-            tenant=tenant,
-            domain=domain_name,
-            is_primary=True
-        )
+            max_attempts = 5
+            attempt = 0
+            domain = None
+            
+            while attempt < max_attempts and domain is None:
+                try:
+                    domain_name = self.generate_unique_domain_name(user.clinic_name, attempt)
+                    domain = Domain.objects.create(
+                        tenant=tenant,
+                        domain=domain_name,
+                        is_primary=True
+                    )
+                    break
+                except IntegrityError:
+                    attempt += 1
+                    if attempt >= max_attempts:
+                        # If we've exhausted our attempts, raise a validation error
+                        raise serializers.ValidationError({
+                            "clinic_name": "Unable to generate unique domain name. Please try a different clinic name."
+                        })
 
-        return (user, domain_name) 
+        return (user, domain.domain) 
+    
+    def generate_unique_domain_name(self, clinic_name, attempt=0):
+        """
+        Generate a unique domain name by adding a random suffix if needed
+        """
+        if attempt == 0:
+            domain_name = f"{slugify(clinic_name)}.{config('DOMAIN_NAME')}"
+
+        else:
+            # Add random suffix
+            suffix = ''.join(random.choices(string.digits, k=1))
+            domain_name = f"{slugify(clinic_name)}-{suffix}.{config('DOMAIN_NAME')}"
+        
+        return domain_name
 
 
 
@@ -98,15 +134,15 @@ class LoginSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(max_length=255, read_only=True)
     access_token = serializers.CharField(max_length=255, read_only=True)
     refresh_token = serializers.CharField(max_length=255, read_only=True)
+    role = serializers.CharField(read_only=True) 
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'full_name', 'access_token', 'refresh_token']
+        fields = ['email', 'password', 'full_name', 'access_token', 'refresh_token', 'role']
 
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
-        # Line 46 where the error is coming from is below
         request = self.context.get('request')
         user = authenticate(request, email=email, password=password)
         if not user:
@@ -121,7 +157,8 @@ class LoginSerializer(serializers.ModelSerializer):
             'email': user.email,
             'full_name': user.fullname,
             'access_token': str(user_tokens.get('access')),
-            'refresh_token': str(user_tokens.get('refresh'))
+            'refresh_token': str(user_tokens.get('refresh')),
+            'role': user.role
         }
 
 class PasswordResetRequestSerializer(serializers.Serializer):

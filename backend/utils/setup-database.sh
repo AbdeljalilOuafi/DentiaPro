@@ -33,3 +33,9 @@ sudo systemctl enable postgresql  # Enable on startup
 # python3 manage.py migrate_schemas --shared 
 # Finally, create a superuser 
 # python3 manage.py createsuperuser
+
+
+#These commands might be helpfull if you're trying to reset the database and having permission issues:
+# REVOKE CONNECT ON DATABASE dentiapro FROM public;
+# ALTER DATABASE dentiapro OWNER TO your_db_user;
+# ALTER USER your_db_user CREATEDB;

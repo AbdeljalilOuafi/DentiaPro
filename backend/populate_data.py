@@ -2,6 +2,7 @@
 import os
 import psycopg2
 import django
+import uuid
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")  # Adjust if necessary
@@ -97,6 +98,13 @@ def populate_test_data():
     with schema_context(public_schema):
         with transaction.atomic():
             # Create tenant1
+            tenant1 = Tenant.objects.create(
+                schema_name=f"tenant_{uuid.uuid4().hex}",
+                name='Dental Clinic 1',
+                is_verified=True,
+                paid_until=None
+            )
+            
             user1 = User.objects.create_user(
                 email="dentist1@example.com",
                 password="testpass123",
@@ -104,15 +112,9 @@ def populate_test_data():
                 last_name="Doe",
                 clinic_name="Dental Clinic 1",
                 is_paid=True,
-                is_verified=True #Email verification
-            )
-            
-            tenant1 = Tenant.objects.create(
-                schema_name=f"tenant_{user1.id}",
-                name='Dental Clinic 1',
-                user=user1,
-                is_verified=True,
-                paid_until=None
+                is_verified=True, #Email verification
+                role=User.Role.ADMIN,
+                tenant=tenant1
             )
             
             Domain.objects.create(
@@ -122,6 +124,14 @@ def populate_test_data():
             )
 
             # Create tenant2
+            tenant2 = Tenant.objects.create(
+                schema_name=f"tenant_{uuid.uuid4().hex}",
+                name='Dental Clinic 2',
+                is_verified=True,
+                paid_until=None
+            )
+            
+            # Create user2
             user2 = User.objects.create_user(
                 email="dentist2@example.com",
                 password="testpass123",
@@ -129,16 +139,11 @@ def populate_test_data():
                 last_name="Smith",
                 clinic_name="Dental Clinic 2",
                 is_paid=True,
-                is_verified=True
-            )
-            
-            tenant2 = Tenant.objects.create(
-                schema_name=f"tenant_{user2.id}",
-                name='Dental Clinic 2',
-                user=user2,
                 is_verified=True,
-                paid_until=None
+                role=User.Role.ADMIN,
+                tenant=tenant2
             )
+        
             
             Domain.objects.create(
                 domain='dental-clinic-2.localhost',  # Changed to localhost
@@ -147,14 +152,13 @@ def populate_test_data():
             )
 
     # Add data to tenant1's schema
-    with schema_context(f"tenant_{user1.id}"):
+    with schema_context(tenant1.schema_name):  # Use tenant1.schema_name
         Clinic.objects.create(name="Main Branch", patient_count=150)
         Clinic.objects.create(name="Downtown Branch", patient_count=75)
 
-    # Add data to tenant2's schema
-    with schema_context(f"tenant_{user2.id}"):
+    with schema_context(tenant2.schema_name):  # Use tenant2.schema_name
         Clinic.objects.create(name="Westside Clinic", patient_count=200)
-
+        
 def main():
     """Main function to run the setup"""
     print("Starting development database setup...")
@@ -172,9 +176,9 @@ def main():
     
     print("\nSetup completed successfully!")
     print("\nCredentials:")
-    print("Superuser:")
-    print("  Email: admin@example.com")
-    print("  Password: admin123")
+    # print("Superuser:")
+    # print("  Email: admin@example.com")
+    # print("  Password: admin123")
     print("\nTest Users:")
     print("1. Dental Clinic 1:")
     print("  Email: dentist1@example.com")

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from .serializer import *
-
+from .permissions import *
 from rest_framework.response import Response
 from rest_framework import status
 from .utils import send_code_to_user, resend_email
@@ -15,20 +15,33 @@ from .models import User, Profile
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+from django_tenants.utils import schema_context
+from django.contrib.auth.models import AnonymousUser
+
+
+    
+
 
 class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer
+    permission_classes = []  # Allow unauthenticated access
 
     def post(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            user, domain_name = serializer.data
-            #Use a Queue System like Celery to send emails in the backgroud, this line is bottlenecking the response
-            resend_email(user['email'])
-            return Response({'status': 'OK', 'user': user, "domain_name": domain_name}, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+        if isinstance(request.user, AnonymousUser):
+            print("Anonymous User")
+        with schema_context('public'):  # Ensure we're in public schema
+            data = request.data
+            serializer = self.serializer_class(data=data)
+            if serializer.is_valid(raise_exception=True):
+                user, domain_name = serializer.save()
+                #Use a Queue System like Celery to send emails in the backgroud, this line is bottlenecking the response
+                resend_email(user.email)
+                
+                user_serializer = UserSerializer(user)
+                return Response({'status': 'OK', 'user': user_serializer.data, "domain_name": domain_name}, status.HTTP_201_CREATED)
+            return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
 class VerifyUserEmail(GenericAPIView):

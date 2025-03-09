@@ -52,18 +52,19 @@ DATABASE_ROUTERS = (
 SHARED_APPS = [
     "django_tenants",
     "django.contrib.contenttypes",
-    "django.contrib.auth",  # User model should exist in the public schema
+    "django.contrib.auth",  
     "django.contrib.sessions",
-    "django.contrib.messages",  # Add this
-    "django.contrib.admin",     # Move this here from INSTALLED_APPS
-    "users",  # Public Schema models (Users, Auth, etc.)
+    "django.contrib.messages",
+    "django.contrib.admin",
+    "users",  # User model should exist in the public schema
     "tenants",  # Tenant model for tracking
 ]
 
 TENANT_APPS = [
     "django.contrib.contenttypes",  # Required inside tenant schemas
     "inventory",  # Example: Each tenant has their own order inventory
-    "appointments",  # Example: Dentist patient appointments
+    "appointments",
+    "patients",
 ]
 
 
@@ -74,13 +75,14 @@ INSTALLED_APPS = list(set(SHARED_APPS + TENANT_APPS))
 MIDDLEWARE = [
     # Custom middleware comes first
     # Django's default middleware
+    'tenants.middleware.CustomTenantMiddleware',
     'django_tenants.middleware.main.TenantMainMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'tenants.middleware.CustomTenantMiddleware', # Notice the custom is not being used here
+    # Put custom authentication middleware here if shit broke
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -90,8 +92,27 @@ MIDDLEWARE = [
 AUTH_USER_MODEL="users.User"
 TENANT_MODEL = "tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
-PUBLIC_SCHEMA_NAME = 'public'
 
+PUBLIC_SCHEMA_NAME = 'public'
+PUBLIC_SCHEMA_URLCONF = 'core.public_urls'
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+TENANT_IGNORE_URLS = [
+    r'^/api/auth/register/',
+    r'^/api/auth/verify-email/',
+    # r'^/api/auth/login/', # The user will login under his subdomain which will link to a Tenant so we should't use public schema
+    r'^/api/auth/password-reset/',
+    r'^/api/auth/password-reset-confirm/',
+    r'^/api/auth/set-new-password/',
+    r'^/api/auth/logout/',
+]
+
+# Domain settings
+DOMAIN_NAME = config('DOMAIN_NAME', default='localhost')
+PUBLIC_DOMAIN_NAME = config('PUBLIC_DOMAIN_NAME', default=DOMAIN_NAME)
+DEVELOPMENT_DOMAIN = config('DEVELOPMENT_DOMAIN', default='localhost')
+
+# We Use this to determine if we're in development
+IS_DEVELOPMENT = config('DJANGO_ENV', default='development') == 'development'
 
 
 
@@ -177,3 +198,17 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 RESEND_SMTP_PORT = 587
 RESEND_SMTP_USERNAME = 'resend'
 RESEND_SMTP_HOST = 'smtp.resend.com'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
