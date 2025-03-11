@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from rest_framework_simplejwt.views import TokenRefreshView
+
 
 urlpatterns = [
     path('register/', views.RegisterUserView.as_view(), name="register"),
@@ -10,7 +12,7 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>/', views.PasswordResetConfirm.as_view(), name='reset-password-confirm'),
     path('set-new-password/', views.SetNewPasswordView.as_view(), name='set-new-password'),
     path('logout/', views.LogoutApiView.as_view(), name='logout'),
-    
+    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
         
     # I think its better if create a seperate app just for profile views 
     

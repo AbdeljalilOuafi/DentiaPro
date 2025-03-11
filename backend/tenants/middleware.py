@@ -24,7 +24,8 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             '/api/auth/password-reset/',
             '/api/auth/password-reset-confirm/',
             '/api/auth/set-new-password/',
-            '/api/auth/logout/'
+            '/api/auth/logout/',
+            '/api/auth/refresh/',
         ]
         
         logger.debug(f"Processing request for path: {request.path}")
