@@ -1,0 +1,16 @@
+[Unit]
+Description=DentiaPro Gunicorn Daemon
+After=network.target
+
+[Service]
+User=ouafi
+Group=ouafi
+WorkingDirectory=/home/ouafi/DentiaPro/backend
+ExecStart=/home/ouafi/DentiaPro/backend/venv/bin/gunicorn --bind 127.0.0.1:8000 core.wsgi:application
+Restart=on-failure
+Environment="PATH=/home/ouafi/DentiaPro/backend/venv/bin"
+Environment="PYTHONPATH=/home/ouafi/DentiaPro/backend"
+
+[Install]
+WantedBy=multi-user.target
+

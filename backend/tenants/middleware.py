@@ -26,6 +26,7 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             '/api/auth/set-new-password/',
             '/api/auth/logout/'
         ]
+        
         logger.debug(f"Processing request for path: {request.path}")
         # Skip tenant logic for exempt paths (no domain/schema checks)
         if any(request.path.startswith(path) for path in exempt_paths):
@@ -55,14 +56,28 @@ class CustomTenantMiddleware(TenantMainMiddleware):
 
         
         print("Path is not exempt, proceeding with normal tenant resolution")
-
-
-        # Proceed with tenant validation for non-exempt paths
         response = super().__call__(request)
-                
-        current_tenant = request.tenant
-        Domain = get_tenant_domain_model()
+
         current_domain = request.get_host().split(':')[0].lower()
+        logger.info(f"Incoming request domain: {current_domain}")
+        
+        Domain = get_tenant_domain_model()
+        domains = Domain.objects.all().values('domain', 'tenant__schema_name')
+        logger.info(f"All domains: {list(domains)}")
+
+        try:
+            domain = Domain.objects.get(domain=current_domain)
+            logger.info(f"Found domain: {domain.domain}, tenant: {domain.tenant.schema_name}")
+            
+            # Set the tenant manually
+            connection = connections[self.TENANT_CONNECTION]
+            connection.set_tenant(domain.tenant)
+            request.tenant = domain.tenant
+            
+        except Domain.DoesNotExist:
+            JsonResponse({"error": f"No domain found for: {current_domain}"})
+                
+        current_tenant = domain.tenant
         tenant_domain = Domain.objects.get(tenant=current_tenant).domain
         
         print("==== Debug Information ====")
@@ -71,10 +86,10 @@ class CustomTenantMiddleware(TenantMainMiddleware):
         print(f"Tenant domain: {tenant_domain}")
         
         
-        print("==== Debug Permission Information ====")
-        print(f"User: {request.user}")
-        print(f"User permissions: {request.user.get_all_permissions()}")  # This will show all permissions
-        print(f"Has view_user permission: {request.user.has_perm('users.view_user')}")
+        # print("==== Debug Permission Information ====")
+        # print(f"User: {request.user}")
+        # print(f"User permissions: {request.user.get_all_permissions()}")  # This will show all permissions
+        # print(f"Has view_user permission: {request.user.has_perm('users.view_user')}")
         
         print("==== User Specific Debug Infomation ====")
         # print(f'user: {request.user.email}')
@@ -84,8 +99,8 @@ class CustomTenantMiddleware(TenantMainMiddleware):
 
         
         # If we're dealing with public tenant, just return
-        if current_tenant.schema_name == 'public':
-            return response
+        # if current_tenant.schema_name == 'public':
+        #     return response
         
 
         try:
@@ -106,8 +121,11 @@ class CustomTenantMiddleware(TenantMainMiddleware):
                     print(f"Token validation error: {str(e)}")
                     return JsonResponse({"error": "Invalid authentication token"}, status=401)
 
+            logger.info(f"User: {request.user}")
+            logger.info(f"User permissions: {request.user.get_all_permissions()}")  # This will show all permissions
+            logger.info(f"Has view_user permission: {request.user.has_perm('users.view_user')}")
             
-        #    # Handle authentication check
+            # Handle authentication check, this is neccessa
             if isinstance(request.user, AnonymousUser):
                 if not self._is_allowed_anonymous_url(request):
                     return JsonResponse({"error": "Authentication required, Login and try again"}, status=401)

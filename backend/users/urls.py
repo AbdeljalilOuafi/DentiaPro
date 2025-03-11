@@ -10,6 +10,7 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>/', views.PasswordResetConfirm.as_view(), name='reset-password-confirm'),
     path('set-new-password/', views.SetNewPasswordView.as_view(), name='set-new-password'),
     path('logout/', views.LogoutApiView.as_view(), name='logout'),
+    
         
     # I think its better if create a seperate app just for profile views 
     

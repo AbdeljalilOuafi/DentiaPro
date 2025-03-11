@@ -14,6 +14,8 @@ sudo systemctl enable postgresql  # Enable on startup
 # ALTER ROLE ouafidev SET timezone TO 'UTC';
 # GRANT ALL PRIVILEGES ON DATABASE dentiapro TO ouafidev;
 
+# this is required for django-tenants
+# ALTER USER ouafidev CREATEDB;
 
 #Add to .env
 
@@ -37,5 +39,5 @@ sudo systemctl enable postgresql  # Enable on startup
 
 #These commands might be helpfull if you're trying to reset the database and having permission issues:
 # REVOKE CONNECT ON DATABASE dentiapro FROM public;
-# ALTER DATABASE dentiapro OWNER TO your_db_user;
+# ALTER DATABASE dentiapro OWNER TO ouafidev;
 # ALTER USER your_db_user CREATEDB;

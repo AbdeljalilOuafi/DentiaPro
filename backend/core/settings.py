@@ -29,8 +29,12 @@ SECRET_KEY = 'django-insecure-b12f#rswntd+1x9s1!j#ipoc3@b1ak3n=t!l5j(dj-tk*qv!+5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = [
+    '.crafitori.com',  # The dot prefix allows all subdomains
+    'crafitori.com',   # The main domain
+    'localhost',    # For local development
+    '127.0.0.1',    # For local development
+]
 DATABASES = {
     "default": {
         "ENGINE": "django_tenants.postgresql_backend",
@@ -61,8 +65,8 @@ SHARED_APPS = [
 ]
 
 TENANT_APPS = [
-    "django.contrib.contenttypes",  # Required inside tenant schemas
-    "inventory",  # Example: Each tenant has their own order inventory
+    # "django.contrib.contenttypes",  # Required inside tenant schemas
+    "inventory",
     "appointments",
     "patients",
 ]
@@ -107,7 +111,7 @@ TENANT_IGNORE_URLS = [
 ]
 
 # Domain settings
-DOMAIN_NAME = config('DOMAIN_NAME', default='localhost')
+DOMAIN_NAME = config('DOMAIN_NAME', default='crafitori.com')
 PUBLIC_DOMAIN_NAME = config('PUBLIC_DOMAIN_NAME', default=DOMAIN_NAME)
 DEVELOPMENT_DOMAIN = config('DEVELOPMENT_DOMAIN', default='localhost')
 

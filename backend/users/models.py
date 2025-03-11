@@ -85,6 +85,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         
         # you can add Custom Permissions but it's not recommended you do so witouth confirmation from the team
 
+
+        #TODO: Enforce Permissions on patient views by adding a Permission class and enforce them by adding them to the roles
+         
         role_permissions = {
             self.Role.ADMIN: [
                 # Users
@@ -109,12 +112,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             ],
             self.Role.DENTIST: [
                 'appointments.add_appointment', 'appointments.change_appointment',
-                'appointments.view_appointment', 'appointments.delete_appointment'
+                'appointments.view_appointment', 'appointments.delete_appointment',
+                # ADD PATIENT PERMISSIONS 
                 'users.view_user',
                 # 'view_medical_records', 'add_medical_records',
                 # 'view_patient', 'add_patient'
             ],
             self.Role.RECEPTIONIST: [
+                'appointments.view_appointment','appointments.delete_appointment',
                 'appointments.add_appointment', 'appointments.change_appointment',
                 # 'view_patient', 'add_patient',
                 # 'view_billing'
