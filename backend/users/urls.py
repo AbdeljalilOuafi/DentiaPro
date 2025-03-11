@@ -13,7 +13,6 @@ urlpatterns = [
     path('set-new-password/', views.SetNewPasswordView.as_view(), name='set-new-password'),
     path('logout/', views.LogoutApiView.as_view(), name='logout'),
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
         
     # I think its better if create a seperate app just for profile views 
     

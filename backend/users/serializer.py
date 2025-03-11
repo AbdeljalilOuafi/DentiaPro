@@ -135,10 +135,11 @@ class LoginSerializer(serializers.ModelSerializer):
     access_token = serializers.CharField(max_length=255, read_only=True)
     refresh_token = serializers.CharField(max_length=255, read_only=True)
     role = serializers.CharField(read_only=True) 
+    domain = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'full_name', 'access_token', 'refresh_token', 'role']
+        fields = ['id', 'email', 'password', 'full_name', 'access_token', 'refresh_token', 'role', 'domain']
 
     def validate(self, attrs):
         email = attrs.get('email')
@@ -153,13 +154,15 @@ class LoginSerializer(serializers.ModelSerializer):
         #     raise AuthenticationFailed("The service is not paid, redirect to the payment page")
 
         user_tokens = user.tokens()
+        domain = Domain.objects.get(tenant=user.tenant)
         return {
             'id': user.id,
             'email': user.email,
             'full_name': user.fullname,
             'access_token': str(user_tokens.get('access')),
             'refresh_token': str(user_tokens.get('refresh')),
-            'role': user.role
+            'role': user.role,
+            'domain': domain.domain
         }
 
 class PasswordResetRequestSerializer(serializers.Serializer):

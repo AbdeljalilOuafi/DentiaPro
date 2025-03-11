@@ -32,9 +32,10 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 ALLOWED_HOSTS = [
     '.crafitori.com',  # The dot prefix allows all subdomains
     'crafitori.com',   # The main domain
-    'localhost',    # For local development
+    'localhost', # For local development
     '127.0.0.1',    # For local development
-]
+] 
+
 DATABASES = {
     "default": {
         "ENGINE": "django_tenants.postgresql_backend",
@@ -134,6 +135,9 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
+    
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # 7 days
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),    # 30 days
 }
 
 
