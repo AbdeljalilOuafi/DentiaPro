@@ -108,6 +108,7 @@ TENANT_IGNORE_URLS = [
     r'^/api/auth/password-reset-confirm/',
     r'^/api/auth/set-new-password/',
     r'^/api/auth/logout/',
+    r'^/api/auth/refresh/',
 ]
 
 # Domain settings
