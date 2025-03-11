@@ -1,3 +1,6 @@
+# Ignore virtualenv
+/backend/venv/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -135,6 +138,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+/backend/*.py
+!/backend/manage.py
+/backend/utils/
+/backend/service
+/backend/init.sh
 
 # Spyder project settings
 .spyderproject
