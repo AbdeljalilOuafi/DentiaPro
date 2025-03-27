@@ -114,18 +114,20 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     
     def generate_unique_domain_name(self, clinic_name, attempt=0):
         """
-        Generate a unique domain name by adding a random suffix if needed
+        Generate a unique domain name by replacing underscores with hyphens
+        and adding a random suffix if needed.
         """
+        # Replace underscores with hyphens
+        sanitized_clinic_name = clinic_name.replace('_', '-')
+        
         if attempt == 0:
-            domain_name = f"{slugify(clinic_name)}.{config('DOMAIN_NAME')}"
-
+            domain_name = f"{slugify(sanitized_clinic_name)}.{config('DOMAIN_NAME')}"
         else:
             # Add random suffix
             suffix = ''.join(random.choices(string.digits, k=1))
-            domain_name = f"{slugify(clinic_name)}-{suffix}.{config('DOMAIN_NAME')}"
+            domain_name = f"{slugify(sanitized_clinic_name)}-{suffix}.{config('DOMAIN_NAME')}"
         
         return domain_name
-
 
 
 class LoginSerializer(serializers.ModelSerializer):
@@ -184,13 +186,13 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             # current_site=get_current_site(request).domain
             # relative_link =reverse('reset-password-confirm', kwargs={'uidb64':uidb64, 'token':token})
             
-            frontend_url = "http://localhost:8000"
+            frontend_url = f"https://{config('PUBLIC_DOMAIN_NAME')}"
             reset_url = f"{frontend_url}/reset-password/{uidb64}/{token}"
             print(reset_url)
-            email_body=f"Hi {user.first_name} use the link below to reset your password {reset_url}"
+            email_body=f"Hi {user.first_name}, use the following link to reset your password {reset_url}"
             data={
                 'email_body':email_body,
-                'email_subject':"Reset your Password",
+                'email_subject':"DentiaPro Password Reset",
                 'to_email':user.email
                 }
             send_normal_email(data)
@@ -217,7 +219,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
             user_id=force_str(urlsafe_base64_decode(uidb64))
             user=User.objects.get(id=user_id)
             if not PasswordResetTokenGenerator().check_token(user, token):
-                raise AuthenticationFailed("reset link is invalid or has expired", 401)
+                raise AuthenticationFailed("Password reset link is invalid or has expired", 401)
             if password != confirm_password:
                 raise AuthenticationFailed("passwords do not match")
             user.set_password(password)
@@ -236,7 +238,6 @@ class LogoutUserSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         self.token = attrs.get('refresh_token')
-
         return attrs
 
     def save(self, **kwargs):

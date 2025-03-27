@@ -26,9 +26,10 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             '/api/auth/set-new-password/',
             '/api/auth/logout/',
             '/api/auth/refresh/',
+            '/api/auth/me',
         ]
         
-        logger.debug(f"Processing request for path: {request.path}")
+        logger.info(f"Processing request for path: {request.path}")
         # Skip tenant logic for exempt paths (no domain/schema checks)
         if any(request.path.startswith(path) for path in exempt_paths):
             logger.debug("Setting public schema for auth URL")
@@ -83,7 +84,7 @@ class CustomTenantMiddleware(TenantMainMiddleware):
         
         print("==== Debug Information ====")
         print(f"Current tenant from request: {current_tenant}")
-        print(f"Curent domain: {current_domain}")
+        logger.info(f"Curent domain: {current_domain}")
         print(f"Tenant domain: {tenant_domain}")
         
         
