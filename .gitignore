@@ -140,7 +140,7 @@ env.bak/
 venv.bak/
 /backend/*.py
 !/backend/manage.py
-/backend/utils/
+/backend/private_utils/
 /backend/service
 /backend/init.sh
 
