@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Patient
 from .serializers import PatientSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from utils.pagination import CustomPagination
 
 class PatientViewSet(viewsets.ModelViewSet):
     """
@@ -16,6 +16,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     serializer_class = PatientSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination  
     lookup_field = 'pk'
     
     def get_queryset(self):
@@ -32,13 +33,17 @@ class PatientViewSet(viewsets.ModelViewSet):
         if dentist_id:
             queryset = queryset.filter(dentist_id=dentist_id)
             
-        # You could add more filters here based on query parameters
-        name_query = self.request.query_params.get('q', None)
-        if name_query:
+        # Enhanced search functionality
+        search_query = self.request.query_params.get('q', None)
+        if search_query:
             queryset = queryset.filter(
-                first_name__icontains=name_query
+                first_name__icontains=search_query
             ) | queryset.filter(
-                last_name__icontains=name_query
+                last_name__icontains=search_query
+            ) | queryset.filter(
+                phone_number__icontains=search_query
+            ) | queryset.filter(
+                email__icontains=search_query
             )
             
         return queryset.select_related('dentist')

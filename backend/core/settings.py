@@ -29,12 +29,15 @@ SECRET_KEY = 'django-insecure-b12f#rswntd+1x9s1!j#ipoc3@b1ak3n=t!l5j(dj-tk*qv!+5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = [
-    '.crafitori.com',  # The dot prefix allows all subdomains
-    'crafitori.com',   # The main domain
-    'localhost', # For local development
-    '127.0.0.1',    # For local development
-] 
+# ALLOWED_HOSTS = [
+#     '.crafitori.com',  # The dot prefix allows all subdomains
+#     'crafitori.com',   # The main domain
+#     'localhost:3000', # For local development
+#     '127.0.0.1',    # For local development
+# ]
+
+ALLOWED_HOSTS = ["*"]
+
 
 DATABASES = {
     "default": {
@@ -63,6 +66,7 @@ SHARED_APPS = [
     "django.contrib.admin",
     "users",  # User model should exist in the public schema
     "tenants",  # Tenant model for tracking
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 TENANT_APPS = [
@@ -74,12 +78,12 @@ TENANT_APPS = [
 
 
 # Application definition
-INSTALLED_APPS = list(set(SHARED_APPS + TENANT_APPS))
-
+INSTALLED_APPS = list(set(SHARED_APPS + TENANT_APPS + ['corsheaders']))
 
 MIDDLEWARE = [
     # Custom middleware comes first
     # Django's default middleware
+    'corsheaders.middleware.CorsMiddleware',  # Add this line
     'tenants.middleware.CustomTenantMiddleware',
     'django_tenants.middleware.main.TenantMainMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -110,6 +114,7 @@ TENANT_IGNORE_URLS = [
     r'^/api/auth/set-new-password/',
     r'^/api/auth/logout/',
     r'^/api/auth/refresh/',
+    r'^/api/auth/me/',
 ]
 
 # Domain settings
@@ -129,6 +134,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10  # Number of items per page
 }
 
 SIMPLE_JWT = {
@@ -221,3 +228,7 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
