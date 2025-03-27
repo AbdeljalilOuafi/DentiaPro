@@ -51,15 +51,15 @@ class RegisterUserView(GenericAPIView):
     permission_classes = []  # Allow unauthenticated access
 
     def post(self, request):
-        if isinstance(request.user, AnonymousUser):
-            print("Anonymous User")
         with schema_context('public'):  # Ensure we're in public schema
             data = request.data
             serializer = self.serializer_class(data=data)
             if serializer.is_valid(raise_exception=True):
                 user, domain_name = serializer.save()
+                
                 #Use a Queue System like Celery to send emails in the backgroud, this line is bottlenecking the response
-                resend_email(user.email)
+                if not settings.IS_DEVELOPMENT:                    
+                    resend_email(user.email)
                 
                 user_serializer = UserSerializer(user)
                 return Response({'status': 'OK', 'user': user_serializer.data, "domain_name": domain_name}, status.HTTP_201_CREATED)

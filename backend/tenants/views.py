@@ -2,7 +2,6 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.http import JsonResponse
-from inventory.models import Clinic
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView

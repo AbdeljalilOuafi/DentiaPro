@@ -1,7 +1,7 @@
 inventory_data = [
     {
         "category": {
-            "name": "Instruments et Équipements de Diagnostic et Traitement",
+            "name": "Équipements de Diagnostic et Traitement",
             "description": "Outils et équipements utilisés pour le diagnostic et le traitement dentaire"
         },
         "items": [

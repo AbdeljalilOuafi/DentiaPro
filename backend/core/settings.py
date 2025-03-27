@@ -118,7 +118,7 @@ TENANT_IGNORE_URLS = [
 ]
 
 # Domain settings
-DOMAIN_NAME = config('DOMAIN_NAME', default='crafitori.com')
+DOMAIN_NAME = config('DOMAIN_NAME', default='localhost')
 PUBLIC_DOMAIN_NAME = config('PUBLIC_DOMAIN_NAME', default=DOMAIN_NAME)
 DEVELOPMENT_DOMAIN = config('DEVELOPMENT_DOMAIN', default='localhost')
 
@@ -143,8 +143,8 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # 7 days
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),    # 30 days
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
 
 
