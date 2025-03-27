@@ -1,11 +1,9 @@
 from django.db import models
-
-from django.db import models
 from tenants.models import Tenant
 
 class Category(models.Model):
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="categories")
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)  # Removed unique=True as it might cause issues across tenants
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -14,8 +12,9 @@ class Category(models.Model):
         return self.name
 
     class Meta:
-        db_table = "categories"
         ordering = ["name"]
+        unique_together = ['tenant', 'name']  # This ensures uniqueness per tenant
+        verbose_name_plural = "categories"
 
 
 class InventoryItem(models.Model):
@@ -24,9 +23,9 @@ class InventoryItem(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     quantity = models.PositiveIntegerField(default=0)
-    unit = models.CharField(max_length=20)
+    unit = models.CharField(max_length=20, default='units')  # Added default
     minimum_quantity = models.PositiveIntegerField(default=0)
-    cost_price = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Added default
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -34,5 +33,5 @@ class InventoryItem(models.Model):
         return f"{self.name} ({self.quantity} {self.unit})"
 
     class Meta:
-        db_table = "inventory_items"
         ordering = ["name"]
+        unique_together = ['tenant', 'name']  # This ensures uniqueness per tenant

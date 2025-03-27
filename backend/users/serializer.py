@@ -19,6 +19,13 @@ from django.db import IntegrityError
 from django.utils.text import slugify
 import random
 import string
+from django_tenants.utils import schema_context
+
+import logging
+logger = logging.getLogger(__name__)
+
+from inventory.models import Category, InventoryItem
+from inventory.inventory_data import inventory_data
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -60,14 +67,12 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # Remove password2 as it's not needed for user creation
-        validated_data.pop('password2', None)
-        
+        validated_data.pop('password2', None) # Remove password2 as it's not needed for user creation
         schema_name = f"tenant_{uuid.uuid4().hex}"  # e.g., "tenant_1a2b3c4d5e..."
         
         with transaction.atomic():
             tenant = Tenant.objects.create(
-                name=validated_data['clinic_name'],  # Use clinic_name instead of first_name
+                name=validated_data['clinic_name'],
                 schema_name = schema_name,  # Makes sure schema_name is unique
                 paid_until=None  # We can set a trial period date here
             )
@@ -82,13 +87,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                 tenant=tenant,
                 role=User.Role.ADMIN  # Set role to ADMIN by default on the Register endpoint since it's the first user for the newly created tenant
             )
-            user.save()  # Ensures user.id is generated
-
+            user.save() 
             Profile.objects.create(user=user)
             
 
             # Domain Logic
-            
             max_attempts = 5
             attempt = 0
             domain = None
@@ -109,6 +112,25 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError({
                             "clinic_name": "Unable to generate unique domain name. Please try a different clinic name."
                         })
+            
+            # Inventory
+            with schema_context(tenant.schema_name):
+                try:
+                    for data in inventory_data:
+                        category_data = data.get('category', 'N/A')
+                        items = data.get('items', [])
+                        
+                        category, _ = Category.objects.get_or_create(tenant=tenant, **category_data)
+                        logger.info(f"Created {category}")
+                        inventory_items = [InventoryItem(tenant=tenant, category=category, name=item) for item in items]
+                        
+                        if inventory_items:
+                            logger.info(f"Adding {inventory_items}")
+                            InventoryItem.objects.bulk_create(inventory_items)
+                        else:
+                            logger.info(f"No inventory_items are being added")
+                except Exception as e:
+                    print(f"Error creating inventory: {str(e)}")
 
         return (user, domain.domain) 
     
@@ -119,13 +141,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         """
         # Replace underscores with hyphens
         sanitized_clinic_name = clinic_name.replace('_', '-')
+        domain = 'localhost' if settings.IS_DEVELOPMENT else config('DOMAIN_NAME')
         
         if attempt == 0:
-            domain_name = f"{slugify(sanitized_clinic_name)}.{config('DOMAIN_NAME')}"
+            domain_name = f"{slugify(sanitized_clinic_name)}.{domain}"
         else:
             # Add random suffix
             suffix = ''.join(random.choices(string.digits, k=1))
-            domain_name = f"{slugify(sanitized_clinic_name)}-{suffix}.{config('DOMAIN_NAME')}"
+            domain_name = f"{slugify(sanitized_clinic_name)}-{suffix}.{domain}"
         
         return domain_name
 
