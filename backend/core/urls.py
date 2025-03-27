@@ -19,7 +19,6 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .public_urls import urlpatterns as public_urlpatterns
-from tenants.views import TenantDataView
 
 
 urlpatterns = public_urlpatterns + [
@@ -27,7 +26,7 @@ urlpatterns = public_urlpatterns + [
     path('api/users/', include('tenants.urls')),
     path('api/appointments/', include('appointments.urls')),
     path('api/patients/', include('patients.urls')),
-    path('api/clinics/', TenantDataView.as_view(), name='clinic-test'),
+    path('api/inventory/', include('inventory.urls')),
 
 ]
 

@@ -56,19 +56,3 @@ class CreateTenantUserView(GenericAPIView):
             }, status=status.HTTP_201_CREATED)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
-
-
-class TenantDataView(APIView):
-    def get(self, request):
-        clinics = Clinic.objects.all().values('name', 'patient_count', 'created_at')
-        
-        return Response({
-            "tenant": request.tenant.name,
-            "schema": request.tenant.schema_name,
-            "user": request.user.email,
-            "role": request.user.role,
-            "clinics": list(clinics)
-        })
-    
