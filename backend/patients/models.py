@@ -71,9 +71,8 @@ class Patient(models.Model):
     
     created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated At"), auto_now=True)
-    profile_picture = models.ImageField(
-        _("Profile Picture"),
-        upload_to='patient_profiles/',
+    profile_picture = models.URLField(
+        _("Profile Picture URL"),
         blank=True,
         null=True
     )

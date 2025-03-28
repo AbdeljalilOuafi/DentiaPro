@@ -9,3 +9,4 @@ gunicorn
 requests
 cryptography
 psycopg[binary]
+cloudinary
