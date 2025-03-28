@@ -15,6 +15,8 @@ from datetime import timedelta
 from decouple import config
 from django_tenants.middleware.main import TenantMainMiddleware
 import os
+import cloudinary
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -232,3 +234,11 @@ LOGGING = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+# Cloudinary Configuration
+cloudinary.config(
+    cloud_name="dqeyi8yx1",
+    api_key="323483631533273",
+    api_secret=config('CLOUDINARY_API_SECRET'),
+    secure=True,
+)
