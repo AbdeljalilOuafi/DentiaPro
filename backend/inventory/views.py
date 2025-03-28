@@ -16,7 +16,16 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter categories by current tenant
-        return Category.objects.filter(tenant=self.request.tenant)
+        queryset = Category.objects.filter(tenant=self.request.tenant)
+    
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(description__icontains=search)
+            )
+        
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(tenant=self.request.tenant)
