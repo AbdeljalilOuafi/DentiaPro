@@ -27,7 +27,7 @@ urlpatterns = public_urlpatterns + [
     path('api/appointments/', include('appointments.urls')),
     path('api/patients/', include('patients.urls')),
     path('api/inventory/', include('inventory.urls')),
-
+    path('api/ai/', include('ai.urls')),
 ]
 
 if settings.DEBUG:
