@@ -76,6 +76,7 @@ TENANT_APPS = [
     "inventory",
     "appointments",
     "patients",
+    "ai",
 ]
 
 
