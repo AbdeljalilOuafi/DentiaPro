@@ -25,9 +25,12 @@ class InventoryItem(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     unit = models.CharField(max_length=20, default='units')  # Added default
     minimum_quantity = models.PositiveIntegerField(default=0)
-    cost_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Added default
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    expiry_date = models.DateTimeField(blank=True, null=True)
+    cost_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Added default
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
 
     def __str__(self):
         return f"{self.name} ({self.quantity} {self.unit})"

@@ -6,6 +6,8 @@ from .models import Category, InventoryItem
 from .serializers import CategorySerializer, InventoryItemSerializer
 from django.db.models import Q
 from utils.pagination import CustomPagination
+from django.db import IntegrityError
+from rest_framework import serializers
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -28,7 +30,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(tenant=self.request.tenant)
+        try:
+            serializer.save(tenant=self.request.tenant)
+        except IntegrityError as e:
+            raise serializers.ValidationError({
+                "error": "The category you're trying to create already exists."
+            })
 
 class InventoryItemViewSet(viewsets.ModelViewSet):
     serializer_class = InventoryItemSerializer
@@ -56,4 +63,9 @@ class InventoryItemViewSet(viewsets.ModelViewSet):
         return queryset.select_related('category')
 
     def perform_create(self, serializer):
-        serializer.save(tenant=self.request.tenant)
+        try:
+            serializer.save(tenant=self.request.tenant)
+        except IntegrityError as e:
+            raise serializers.ValidationError({
+                "error": "The item you're trying to create already exists."
+            })

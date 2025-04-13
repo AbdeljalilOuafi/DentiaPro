@@ -311,8 +311,3 @@ class ProfilePrivateSerializer(serializers.ModelSerializer):
             
         instance.save()
         return instance
-
-
-
-
-

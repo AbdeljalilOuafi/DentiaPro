@@ -9,7 +9,7 @@ from .serializers import PatientSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from utils.pagination import CustomPagination
 from .utils import upload_patient_image
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 class PatientViewSet(viewsets.ModelViewSet):
@@ -20,7 +20,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     lookup_field = 'pk'
     
     def get_queryset(self):

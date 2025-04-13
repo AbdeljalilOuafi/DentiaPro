@@ -16,6 +16,6 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'category', 'category_name', 'name', 'description',
             'quantity', 'unit', 'minimum_quantity', 'cost_price',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at', 'expiry_date', 'selling_price'
         ]
         read_only_fields = ['created_at', 'updated_at']
