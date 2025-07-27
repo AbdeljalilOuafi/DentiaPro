@@ -138,11 +138,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-/backend/*.py
-!/backend/manage.py
+
 /backend/private_utils/
-/backend/service
-/backend/init.sh
 
 # Spyder project settings
 .spyderproject
