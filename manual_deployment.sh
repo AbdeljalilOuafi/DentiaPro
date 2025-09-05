@@ -96,4 +96,4 @@ python3 manage.py migrate_schemas --shared
 # This is the final step. It starts the Gunicorn server.
 # This command runs in the foreground and will keep the script alive.
 echo "Starting Gunicorn server..."
-python3 -m gunicorn core.wsgi:application --bind 0.0.0.0:8000
+python3 -m gunicorn core.wsgi:application --bind 0.0.0.0:8000 --timeout 120
