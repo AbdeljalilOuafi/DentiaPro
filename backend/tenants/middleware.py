@@ -46,7 +46,7 @@ class CustomTenantMiddleware(TenantMainMiddleware):
                     name='Public'
                 )
                 Domain = apps.get_model('tenants', 'Domain')
-                domain_name = settings.DEVELOPMENT_DOMAIN if settings.IS_DEVELOPMENT else settings.PUBLIC_DOMAIN_NAME
+                domain_name = settings.DOMAIN_NAME
                 Domain.objects.create(
                     domain=domain_name,
                     tenant=public_tenant,
@@ -77,8 +77,8 @@ class CustomTenantMiddleware(TenantMainMiddleware):
             request.tenant = domain.tenant
             
         except Domain.DoesNotExist:
-            JsonResponse({"error": f"No domain found for: {current_domain}"})
-                
+            return JsonResponse({"error": f"No domain found for: {current_domain}"}, status=404)  
+                      
         current_tenant = domain.tenant
         tenant_domain = Domain.objects.get(tenant=current_tenant).domain
         

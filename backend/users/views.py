@@ -58,7 +58,7 @@ class RegisterUserView(GenericAPIView):
                 user, domain_name = serializer.save()
                 
                 #Use a Queue System like Celery to send emails in the backgroud, this line is bottlenecking the response
-                if not settings.IS_DEVELOPMENT:                    
+                if not settings.DEBUG:                    
                     resend_email(user.email)
                 
                 user_serializer = UserSerializer(user)

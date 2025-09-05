@@ -22,7 +22,7 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS('Public tenant created successfully'))
                     
                     # Create domain for public tenant
-                    domain_name = settings.DEVELOPMENT_DOMAIN if settings.IS_DEVELOPMENT else settings.PUBLIC_DOMAIN_NAME
+                    domain_name = settings.DOMAIN_NAME
                     Domain.objects.get_or_create(
                         domain=domain_name,
                         tenant=public_tenant,
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS('Public tenant already exists'))
                     
                     # Update domain if needed
-                    domain_name = settings.DEVELOPMENT_DOMAIN if settings.IS_DEVELOPMENT else settings.PUBLIC_DOMAIN_NAME
+                    domain_name = settings.DOMAIN_NAME
                     domain, created = Domain.objects.get_or_create(
                         tenant=public_tenant,
                         is_primary=True,

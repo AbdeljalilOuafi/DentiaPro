@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    environment:
+      # These names are REQUIRED by the official postgres image
+      # and they correctly match your .env file. This part is fine.
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+    container_name: drf_backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      # --- Django Settings ---
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=${DEBUG}
+
+      # --- Database Connection ---
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PRODUCTION_DOMAIN_NAME=${PRODUCTION_DOMAIN_NAME}
+      # These are read by config() and are intentionally overridden for Docker.
+      - DB_HOST=postgres 
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

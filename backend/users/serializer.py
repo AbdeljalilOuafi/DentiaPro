@@ -141,7 +141,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         """
         # Replace underscores with hyphens
         sanitized_clinic_name = clinic_name.replace('_', '-')
-        domain = 'localhost' if settings.IS_DEVELOPMENT else config('DOMAIN_NAME')
+        domain = settings.DOMAIN_NAME
         
         if attempt == 0:
             domain_name = f"{slugify(sanitized_clinic_name)}.{domain}"
@@ -209,7 +209,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             # current_site=get_current_site(request).domain
             # relative_link =reverse('reset-password-confirm', kwargs={'uidb64':uidb64, 'token':token})
             
-            frontend_url = f"https://{config('PUBLIC_DOMAIN_NAME')}"
+            frontend_url = f"https://www.{config('DOMAIN_NAME')}"
             reset_url = f"{frontend_url}/reset-password/{uidb64}/{token}"
             print(reset_url)
             email_body=f"Hi {user.first_name}, use the following link to reset your password {reset_url}"

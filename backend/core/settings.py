@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b12f#rswntd+1x9s1!j#ipoc3@b1ak3n=t!l5j(dj-tk*qv!+5'
+SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
@@ -44,9 +44,9 @@ ALLOWED_HOSTS = ["*"]
 DATABASES = {
     "default": {
         "ENGINE": "django_tenants.postgresql_backend",
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
+        "NAME": config("POSTGRES_DB"),
+        "USER": config("POSTGRES_USER"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
         "HOST": config("DB_HOST", default="localhost"),
         "PORT": config("DB_PORT", default="5432"),
     }
@@ -121,13 +121,7 @@ TENANT_IGNORE_URLS = [
 ]
 
 # Domain settings
-DOMAIN_NAME = config('DOMAIN_NAME', default='localhost')
-PUBLIC_DOMAIN_NAME = config('PUBLIC_DOMAIN_NAME', default=DOMAIN_NAME)
-DEVELOPMENT_DOMAIN = config('DEVELOPMENT_DOMAIN', default='localhost')
-
-# We Use this to determine if we're in development
-IS_DEVELOPMENT = config('DJANGO_ENV', default='development') == 'development'
-
+DOMAIN_NAME = config('PRODUCTION_DOMAIN_NAME', default='localhost')
 
 
 REST_FRAMEWORK = {

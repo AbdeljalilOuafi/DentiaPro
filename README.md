@@ -44,50 +44,44 @@ The back-end for Dentia Pro is engineered to manage core business logic, data pe
 *   **WSGI HTTP Server:** Gunicorn
 *   **Deployment & DevOps:** Configuration management, SSL/TLS with Certbot, logging, and process management with Systemd.
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Local Development)
 
-Follow these instructions to get a local development environment running.
+This project is fully containerized using Docker 🐳. All you need to get started is Docker and Docker Compose installed on your system.
 
-### **Prerequisites**
-*   Python >=3.10
-*   PostgreSQL
-*   Git
+### 1️⃣ Clone the Repository
 
-### **Installation**
+```bash
+git clone https://github.com/AbdeljalilOuafi/DentiaPro.git
+cd DentiaPro/
+```
 
-1.  **Clone the repository:**
-    ```sh
-    git clone https://github.com/AbdeljalilOuafi/DentiaPro.git
-    cd DentiaPro
-    ```
+### 2️⃣ Set Up Your Environment Variables
 
-2.  **Set up the PostgreSQL Database:**
-    *   Create a new database and a user with privileges for that database.
+The application uses an `.env` file to manage secrets and environment-specific configuration. I have provided a template to make this easy. 📝
 
-3.  **Create a virtual environment and install dependencies:**
-    ```sh
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
+First, copy the example file to create your own local configuration:
 
-4.  **Configure Environment Variables:**
-    *   Create a `.env` file in the root directory.
-    ```env
-    SECRET_KEY='your-django-secret-key'
-    DEBUG=True
-    DATABASE_URL='postgres://USER:PASSWORD@HOST:PORT/DBNAME'
-    CLOUDINARY_URL='cloudinary://API_KEY:API_SECRET@CLOUD_NAME'
-    ```
+```bash
+cp .env.example .env
+```
 
-5.  **Run database migrations:**
-    ```sh
-    python3 manage.py migrate_schemas --shared
-    ```
+Next, open the newly created `.env` file and fill in the required values, especially `POSTGRES_PASSWORD` and `DJANGO_SECRET_KEY`. 🔑
 
-6.  **Run the development server:**
-    ```sh
-    python3 manage.py runserver
-    ```
+### 3️⃣ Build and Run the Application
 
-The API should now be running at `http://127.0.0.1:8000`.
+With your `.env` file configured, you can build the images and launch all the services with a single command:
+
+```bash
+docker compose up --build
+```
+
+- **`--build`**: This flag tells Docker Compose to build the backend image based on the Dockerfile. You only need to use this the first time or when you change the Dockerfile or requirements.txt. 🔨
+- **Detached mode**: To run the containers in the background (detached mode), add the `-d` flag: `docker compose up --build -d`. 🌙
+
+### 4️⃣ You're All Set! ✅
+
+Docker Compose will now start the PostgreSQL database and the Django backend server with Gunicorn.
+
+**🌐 The API will be running and available at http://localhost:8000/**
+
+You can view the logs in real-time in your terminal. To stop the application, press `Ctrl + C` or run `docker compose down` from another terminal. 🛑
