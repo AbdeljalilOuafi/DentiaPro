@@ -72,13 +72,15 @@ echo "Dependencies are up to date."
 
 # --- Section 5: Database Connectivity & Migrations ---
 # Wait for the external Neon database to be ready before proceeding.
-echo "Waiting for the external PostgreSQL database..."
-# The PGPASSWORD variable is used by psql to authenticate non-interactively.
-while ! PGPASSWORD=$POSTGRES_PASSWORD psql -h "$DB_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q'; do
+echo "Waiting for the external PostgreSQL database at $DB_HOST:$DB_PORT..."
+# The -z flag tells nc to scan for a listening daemon without sending data.
+# The -w 5 flag sets a timeout of 5 seconds for the connection attempt.
+while ! nc -z -w 5 "$DB_HOST" "$DB_PORT"; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
 done
 echo "PostgreSQL connection successful."
+
 
 # Navigate into the backend directory to run Django commands.
 cd backend
