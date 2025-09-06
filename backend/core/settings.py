@@ -49,6 +49,9 @@ DATABASES = {
         "PASSWORD": config("POSTGRES_PASSWORD"),
         "HOST": config("DB_HOST", default="localhost"),
         "PORT": config("DB_PORT", default="5432"),
+        "OPTIONS": {
+            'sslmode': config('POSTGRES_SSLMODE', default='disable')
+        }
     }
 }
 
